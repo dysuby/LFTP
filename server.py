@@ -1,7 +1,14 @@
 import socketserver
 import threading
 from utils import logger, operation
+from sender import Sender
+from receiver import Reciever
 
+senders = {}
+receivers = {}
+
+sender_lock = threading.Lock()
+receiver_lock = threading.Lock()
 
 class UDPServer(socketserver.ThreadingMixIn, socketserver.UDPServer):
     """
@@ -17,18 +24,21 @@ class ServerHandler(socketserver.BaseRequestHandler):
 
     def setup(self):
         host, port = self.client_address
-        self.logger = logger(threading.current_thread().name)
+        self.logger = logger('client: {}:{}'.format(host, port))
         self.logger.log('Recieve request from {}:{}'.format(host, port))
 
     def handle(self):
-        filename = str(self.request[0].strip(), 'utf-8')
-        f = open(filename, 'rb')
-        l = f.read(1024)
-        socket = self.request[1]
-        while l:
-            socket.sendto(l, self.client_address)
-            l = f.read(1024)
-        self.logger.log('Send {} done'.format(filename))
+        host, port = self.client_address
+        if senders.get(self.client_address) == None:
+            filename = str(self.request[0].strip(), 'utf-8')
+            sender_lock.acquire()
+            senders[self.client_address] = Sender(host, port, filename)
+            sender_lock.release()
+
+        sender = senders[self.client_address]
+        sender.send(self.request[1])
+        if sender.done:
+            self.logger.log('Send {} done'.format(sender.filename))
 
 
 if __name__ == '__main__':

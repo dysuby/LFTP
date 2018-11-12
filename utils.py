@@ -17,5 +17,5 @@ class operation:
 
     Isend - upload file to server
     """
-    Iget = 0
-    Isend = 1
+    Iget = 'Iget'
+    Isend = 'Isend'

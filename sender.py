@@ -159,7 +159,7 @@ class Sender:
             except StopIteration:
                 pass
             except ConnectionResetError:
-                break
+                actors.clear()
         self.logger.log('Work Done')
 
     def sendTo(self):
@@ -170,8 +170,6 @@ class Sender:
                 self.logger.log(
                     'Waiting client free current SEQ: {}'.format(kw[Field.SEQ]))
                 self.sc.sendto(PACK.serialize(b'', kw), self.receiver_addr)
-            # elif self.window.action == CC.NONE:
-            #     self.logger.log('No Action')
             else:
                 if self.window.action == CC.TRANS:
                     seqs, seqnum = self.window.getNonSend()
@@ -203,11 +201,12 @@ class Sender:
                 self.logger.log('receive ACK: {}'.format(kw[Field.ACK]))
 
                 self.window.ack(kw[Field.ACK])
-                while self.file and self.window.canSend(self.rwnd):
+                while self.window.canSend(self.rwnd):
                     data = self.read()
                     if not data:
                         self.logger.log('All file data pushed into queue')
                         self.window.push(b'')
+                        break
                     else:
                         self.window.push(data)
                         self.f_seq += 1

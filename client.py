@@ -20,37 +20,33 @@ class Client:
         if opt == Operation.Iget:
             kw = {Field.FILE_NAME: Constant.SERVER_PATH +
                 filename, Field.RWND: self.rwnd, Field.OPT: opt}
-    
-            data = PACK.serialize(b'', kw)
-            sc.sendto(data, self.server_addr)
-            rl, _, _ = select.select([sc], [], [], Constant.TIMEOUT)
-            while not rl:
-                sc.sendto(data, self.server_addr)
-                rl, _, _ = select.select([sc], [], [], Constant.TIMEOUT)
 
+            self.send(sc, kw)
             data = sc.recv(Constant.MSS + Field.HEADER_LEN)
             kw, _ = PACK.deserialize(data)
             self.server_addr = self.server_addr[0], kw[Field.PORT]
+            sc.close()
             worker = Reciever(self.server_addr, self.client_port, Constant.SERVER_PATH + filename,
-                Constant.CLIENT_PATH + '{}.{}'.format(str(time.time()), filename.split('.')[-1]))
+                Constant.CLIENT_PATH + '{}.{}'.format(str(time.time()), filename.split('.')[-1]), 0)
         else:
-            sc.bind(('localhost', self.client_port))
-            kw = {Field.OPT: Constant.Isend,
-                  Field.FILE_NAME: filename, Field.OPT: opt}
-            data = PACK.serialize(b'', kw)
-            sc.sendto(data, self.server_addr)
-            rl, _, _ = select.select([sc], [], [], Constant.TIMEOUT)
-            while not rl:
-                sc.sendto(data, self.server_addr)
-                rl, _, _ = select.select([sc], [], [], Constant.TIMEOUT)
+            kw = {Field.OPT: opt, Field.FILE_NAME: filename, Field.OPT: opt}
 
+            self.send(sc, kw)
             data = sc.recv(Constant.MSS + Field.HEADER_LEN)
             kw, _ = PACK.deserialize(data)
             self.server_addr = self.server_addr[0], kw[Field.PORT]
+            sc.close()
             worker = Sender(self.server_addr, self.client_port,
                             Constant.CLIENT_PATH + filename, kw[Field.RWND])
-        sc.close()
         worker.run()
+
+    def send(self, sc, kw):
+        data = PACK.serialize(b'', kw)
+        sc.sendto(data, self.server_addr)
+        rl, _, _ = select.select([sc], [], [], Constant.TIMEOUT)
+        while not rl:
+            sc.sendto(data, self.server_addr)
+            rl, _, _ = select.select([sc], [], [], Constant.TIMEOUT)
 
 if __name__ == '__main__':
     HOST, PORT = 'localhost', Constant.SERVER_PORT

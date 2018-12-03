@@ -4,17 +4,18 @@ from datetime import datetime
 class PACK:
     @staticmethod
     def serialize(data, kwargs={}):
-        res = '{}|'.format(len(kwargs))
+        res = '{}{}'.format(len(kwargs), Field.CUT)
         for key, value in kwargs.items():
-            res += '{}:{}|'.format(key, value)
+            res += '{}:{}{}'.format(key, value, Field.CUT)
         res = bytes(res, 'utf-8') + data
         return res
 
     @staticmethod
     def deserialize(data):
-        fileds = data.split(b'|')
+        fileds = data.split(bytes(Field.CUT, 'utf-8'))
         kw = {}
-        for i in range(1, int(fileds[0]) + 1):
+        end = int(fileds[0]) + 1
+        for i in range(1, end):
             key, value = fileds[i].split(b':')
             key = key.decode()
             if key in [Field.EOF]:
@@ -24,7 +25,7 @@ class PACK:
             else:
                 value = int(value)
             kw[key] = value
-        return kw, fileds[-1]
+        return kw, b''.join(fileds[end:])
 
 
 class Logger:
@@ -80,7 +81,8 @@ class Field:
     FILE_NAME = 'fn'
     OPT = 'opt'
 
-    HEADER_LEN = 100
+    HEADER_LEN = 200
+    CUT = '|!@#$%^&*()'
 
 
 class CongestionControl:

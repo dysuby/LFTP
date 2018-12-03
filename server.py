@@ -1,43 +1,53 @@
-import socketserver
 import threading
-from utils import logger, operation
+import time
+import socket
+import select
+from utils import Operation, Constant, Logger, PACK, Field
 from sender import Sender
 from receiver import Reciever
 
-pool = {}
+client_table = {}
 
-class ServerHandler(socketserver.BaseRequestHandler):
+
+class Server:
     """
     handle udp requests
     """
 
-    def setup(self):
-        host, port = self.client_address
-        self.logger = logger('client: {}:{}'.format(host, port))
+    def __init__(self, host, port):
+        self.addr = (host, port)
+        self.logger = Logger('Server ')
 
-    def handle(self):
-        host, port = self.client_address
-        if pool.get(self.client_address) == None:
-            opt, filename = str(self.request[0].strip(), 'utf-8').split(' ')
-            if opt == operation.Iget:
-                pool[self.client_address] = Sender(host, port, filename)
-            else:
-                pool[self.client_address] = Reciever(host, port, filename)
+    def serve(self):
+        sc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sc.bind(self.addr)
+        while True:
+            rl, _, _ = select.select([sc], [], [])
+            data, client_addr = sc.recvfrom(Constant.MSS + Field.HEADER_LEN)
 
-        worker = pool[self.client_address]
-        worker.work(self.request[1])
-        if worker.done:
-            pool.pop(self.client_address)
-            self.logger.log('{} {} done'.format(worker.opt, worker.filename))
-        else:
-            self.logger.log('{}: {} / {} bytes'.format(worker.filename, worker.f.tell(), worker.statinfo.st_size))
-
+            if client_table.get(client_addr) == None or not client_table.get(client_addr).is_alive():
+                kwargs = PACK.deserialize(data)[0]
+                if kwargs[Field.OPT] == Operation.Iget:
+                    self.logger.log('Receive {} request from {}'.format(
+                        Operation.Iget, client_addr))
+                    worker = Sender(client_addr, Constant.WORKER_PORT,
+                                    kwargs[Field.FILE_NAME], kwargs[Field.RWND])
+                elif kwargs[Field.OPT] == Operation.Isend:
+                    self.logger.log('Receive {} request from {}'.format(
+                        Operation.Isend, client_addr))
+                    worker = Reciever(client_addr, Constant.WORKER_PORT, Constant.CLIENT_PATH +
+                                      kwargs[Field.FILE_NAME], Constant.SERVER_PATH +
+                                      '{}.{}'.format(str(time.time()), kwargs[Field.FILE_NAME].split('.')[-1]))
+                else:
+                    raise ValueError
+                son = threading.Thread(target=worker.run)
+                son.start()
+                Constant.WORKER_PORT += 1
+                client_table[client_addr] = son
 
 if __name__ == '__main__':
-    HOST, PORT = 'localhost', 9999
+    HOST, PORT = 'localhost', Constant.SERVER_PORT
 
-    server = socketserver.UDPServer((HOST, PORT), ServerHandler)
+    Logger('Server: ').log('Listen on {}:{}'.format(HOST, PORT))
 
-    logger('Server: ').log('Listen on {}:{}'.format(HOST, PORT))
-    
-    server.serve_forever()
+    Server(HOST, PORT).serve()

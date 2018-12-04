@@ -32,7 +32,7 @@ class Reciever:
     def recv(self):
         ACK = 0
         sc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sc.bind(('localhost', self.port))
+        sc.bind(('', self.port))
         kw = {Field.FILE_NAME: self.remotePath, Field.ACK: ACK,
               Field.RWND: self.ws, Field.PORT: self.port}
         while True:

@@ -120,7 +120,7 @@ class Sender:
         self.window = Window(100)
         self.port = port
         self.sc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sc.bind(('localhost', self.port))
+        self.sc.bind(('', self.port))
 
         self.lastSeq = ceil(self.statinfo.st_size / Constant.MSS)
         self.f_seq = 0

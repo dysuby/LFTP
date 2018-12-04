@@ -46,7 +46,7 @@ class Server:
 
 
 if __name__ == '__main__':
-    HOST, PORT = 'localhost', Constant.SERVER_PORT
+    HOST, PORT = '', Constant.SERVER_PORT
 
     Logger('Server: ').log('Listen on {}:{}'.format(HOST, PORT))
 

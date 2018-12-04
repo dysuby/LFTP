@@ -17,7 +17,7 @@ class Client:
 
     def handle(self, filename, opt=Operation.Iget):
         sc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sc.bind(('localhost', self.client_port))
+        sc.bind(('', self.client_port))
         if opt == Operation.Iget:
             kw = {Field.FILE_NAME: Constant.SERVER_PATH +
                   filename, Field.RWND: self.rwnd, Field.OPT: opt}

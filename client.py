@@ -28,7 +28,7 @@ class Client:
             self.server_addr = self.server_addr[0], kw[Field.PORT]
             sc.close()
             worker = Reciever(self.server_addr, self.client_port, Constant.SERVER_PATH + filename,
-                              Constant.CLIENT_PATH + str(time.time()), 0.5)
+                              Constant.CLIENT_PATH + str(time.time()), Constant.THROW_RATE)
         else:
             kw = {Field.OPT: opt, Field.FILE_NAME: filename, Field.OPT: opt}
 

@@ -36,7 +36,7 @@ class Server:
                     self.logger.log('Receive {} request from {}'.format(
                         Operation.Isend, client_addr))
                     worker = Reciever(client_addr, Constant.WORKER_PORT, Constant.CLIENT_PATH +
-                                      kwargs[Field.FILE_NAME], Constant.SERVER_PATH + str(time.time()), 0.5)
+                                      kwargs[Field.FILE_NAME], Constant.SERVER_PATH + str(time.time()), Constant.THROW_RATE)
                 else:
                     raise ValueError
                 son = threading.Thread(target=worker.run)

@@ -65,6 +65,7 @@ class Constant:
     WORKER_PORT = 11113
     TIMEOUT = 0.01
     HANDLE_PRO = 0.5
+    THROW_RATE = 0.5
 
 class Field:
     RWND = 'rwnd'

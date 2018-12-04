@@ -8,7 +8,7 @@
 
 服务端：`py server.py`，默认端口为 `11112`
 
-客户端：`py client.py <opt> <filename> <port>`，`opt` 为 `Isend` 或 `Iget`，`filename` 为相对路径，表示要传输或接受的文件名（`test/server` 相对路径）
+客户端：`py client.py <opt> <filename> <port>`，`opt` 为 `Isend` 或 `Iget`，`filename` 为相对路径，表示要传输或接受的文件名（`test/server` 相对路径），`port` 为客户端的端口，运行时如果服务器不在本地需要更改文件内的配置
 
 
 

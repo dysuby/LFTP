@@ -47,18 +47,20 @@ class Reciever:
                 rkw, data = PACK.deserialize(seq)
                 self.logger.log('receive SEQ: {} expected SEQ: {}'.format(
                     rkw[Field.SEQ], ACK + 1))
-                if rkw[Field.SEQ] == ACK + 1 and self.putData(data):
-                    ACK += 1
-                    self.logger.log('Correct SEQ: {}'.format(ACK))
-                    if ACK == rkw[Field.SEQ_NUM] + 1:
-                        self.done = True
-                        break
+                if rkw[Field.SEQ] == ACK + 1:
+                    if self.putData(data):
+                        ACK += 1
+                        kw[Field.ACK] = rkw[Field.SEQ]
+                        self.logger.log('Correct SEQ: {}'.format(ACK))
+                        if ACK == rkw[Field.SEQ_NUM] + 1:
+                            self.done = True
+                            break
+                    else:
+                        self.logger.log('Full Queue')
                 elif rkw[Field.SEQ] != ACK + 1:
+                    kw[Field.ACK] = rkw[Field.SEQ]
                     self.logger.log('Unexpected SEQ {}'.format(rkw[Field.SEQ]))
-                else:
-                    self.logger.log('Full Queue')
 
-                kw[Field.ACK] = rkw[Field.SEQ]
                 kw[Field.RWND] = self.ws - len(self.buffer)
             yield
         sc.close()

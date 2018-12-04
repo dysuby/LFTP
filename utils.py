@@ -64,7 +64,7 @@ class Constant:
     SERVER_PORT = 11112
     WORKER_PORT = 11113
     TIMEOUT = 0.01
-
+    HANDLE_PRO = 0.5
 
 class Field:
     RWND = 'rwnd'

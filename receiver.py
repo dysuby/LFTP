@@ -65,7 +65,7 @@ class Reciever:
     def handleData(self):
         part = 0
         while not self.f.closed:
-            while len(self.buffer):
+            while len(self.buffer) and random.random() > Constant.HANDLE_PRO:
                 data = self.getData()
                 self.f.write(data)
                 part += 1
@@ -73,7 +73,7 @@ class Reciever:
             if self.done:
                 self.f.close()
                 self.logger.log('Receive file done')
-            yield asyncio.sleep(random.random() * 2)
+            yield
 
     def putData(self, data):
         if len(self.buffer) < self.ws:

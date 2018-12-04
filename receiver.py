@@ -49,6 +49,7 @@ class Reciever:
                     rkw[Field.SEQ], ACK + 1))
                 if rkw[Field.SEQ] == ACK + 1:
                     ACK += 1
+                    self.putData(data)
                     self.logger.log('Correct SEQ: {}'.format(ACK))
                     if ACK == rkw[Field.SEQ_NUM] + 1:
                         self.done = True

@@ -88,4 +88,3 @@ class CongestionControl:
 
     TRANS = 'tranmits'
     RETRANS = 'retransmits'
-    NONE = 'non'

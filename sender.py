@@ -33,24 +33,25 @@ class Window:
         # GBN
         if acknum == self.base:
             self.base += 1
+            self.q = self.q[1:]
             self.logger.log('Correct ACK {}'.format(acknum))
 
         self.logger.log('Current state: {} action: {} cwnd: {} ssthresh: {} NonACK: {} NonSend: {}'.format(
             self.state, self.action, self.cwnd, self.ssthresh, self.base, self.next))
 
     def canSend(self, rwnd):
-        return len(self.q) - self.base < min([self.cwnd, self.ws, rwnd])
+        return len(self.q) < min([self.cwnd, self.ws, rwnd])
 
     def push(self, data):
         self.q.append(data)
 
     def getNonSend(self):
-        ret = self.q[self.next:], self.next
+        ret = self.q[self.next - self.base:], self.next
         self.next += len(ret[0])
         return ret
 
     def getNonACK(self):
-        return self.q[self.base:self.next], self.base
+        return self.q[:self.next - self.base], self.base
 
     def slowStart(self, acknum):
         if self.cwnd >= self.ssthresh:
@@ -157,7 +158,7 @@ class Sender:
                 self.logger.log(
                     'Waiting receiver free current SEQ: {}'.format(kw[Field.SEQ]))
                 self.sc.sendto(PACK.serialize(b'', kw), self.receiver_addr)
-            if self.window.action == CC.NONE:
+            elif self.window.action == CC.NONE:
                 self.logger.log('No Action')
             else:
                 if self.window.action == CC.TRANS:

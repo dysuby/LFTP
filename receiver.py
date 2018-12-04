@@ -60,7 +60,7 @@ class Reciever:
             else:
                 self.logger.log('Full Queue')
 
-                kw[Field.RWND] = self.ws - len(self.buffer)
+            kw[Field.RWND] = self.ws - len(self.buffer)
             yield
         sc.close()
 

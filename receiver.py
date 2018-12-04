@@ -43,23 +43,21 @@ class Reciever:
             sc.sendto(empty, self.sender_addr)
             seq = sc.recv(Constant.MSS + Field.HEADER_LEN)
 
-            if random.random() >= self.throw_rate:   # 随机丢包
+            if len(self.buffer) < self.ws and random.random() >= self.throw_rate:   # 随机丢包
                 rkw, data = PACK.deserialize(seq)
                 self.logger.log('receive SEQ: {} expected SEQ: {}'.format(
                     rkw[Field.SEQ], ACK + 1))
                 if rkw[Field.SEQ] == ACK + 1:
-                    if self.putData(data):
-                        ACK += 1
-                        kw[Field.ACK] = rkw[Field.SEQ]
-                        self.logger.log('Correct SEQ: {}'.format(ACK))
-                        if ACK == rkw[Field.SEQ_NUM] + 1:
-                            self.done = True
-                            break
-                    else:
-                        self.logger.log('Full Queue')
-                elif rkw[Field.SEQ] != ACK + 1:
-                    kw[Field.ACK] = rkw[Field.SEQ]
+                    ACK += 1
+                    self.logger.log('Correct SEQ: {}'.format(ACK))
+                    if ACK == rkw[Field.SEQ_NUM] + 1:
+                        self.done = True
+                        break
+                else:
                     self.logger.log('Unexpected SEQ {}'.format(rkw[Field.SEQ]))
+                kw[Field.ACK] = rkw[Field.SEQ]
+            else:
+                self.logger.log('Full Queue')
 
                 kw[Field.RWND] = self.ws - len(self.buffer)
             yield
@@ -79,10 +77,7 @@ class Reciever:
             yield
 
     def putData(self, data):
-        if len(self.buffer) < self.ws:
-            self.buffer.append(data)
-            return True
-        return False
+        self.buffer.append(data)
 
     def getData(self):
         return self.buffer.popleft()

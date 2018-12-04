@@ -61,7 +61,7 @@ class Reciever:
                 self.logger.log('Full Queue')
 
             if rkw[Field.SEQ] == Field.EMPTY:
-                rkw[Field.ACK] = Field.EMPTY
+                kw[Field.ACK] = Field.EMPTY
             kw[Field.RWND] = self.ws - len(self.buffer)
             yield
         sc.close()

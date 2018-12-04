@@ -118,17 +118,15 @@ class Sender:
         self.port = port
         self.sc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sc.bind(('', self.port))
+        self.done = False
 
         self.lastSeq = ceil(self.statinfo.st_size / Constant.MSS)
         self.f_seq = 0
 
     def read(self):
-        if self.file:
-            ret = self.file[:Constant.MSS]
-            self.file = self.file[Constant.MSS:]
-            return ret
-        else:
-            return b''
+        ret = self.file[:Constant.MSS]
+        self.file = self.file[Constant.MSS:]
+        return ret
 
     def run(self):
         self.logger.log('Begin to work')
@@ -150,7 +148,7 @@ class Sender:
 
     def sendTo(self):
         kw = {Field.PORT: self.port, Field.SEQ_NUM: self.lastSeq + 1}
-        while True:
+        while not self.done:
             if self.rwnd == 0:
                 kw[Field.SEQ] = Field.EMPTY
                 self.logger.log(
@@ -186,12 +184,10 @@ class Sender:
 
                 if kw[Field.ACK] != Field.EMPTY:
                     self.window.ack(kw[Field.ACK])
-                while self.window.canSend(self.rwnd):
+                while self.file and self.window.canSend(self.rwnd):
                     data = self.read()
                     if not data:
                         self.logger.log('All file data pushed into queue')
-                        self.window.push(b'')
-                        break
                     else:
                         self.window.push(data)
                         self.f_seq += 1
@@ -199,6 +195,10 @@ class Sender:
                             'Push SEQ {} into queue'.format(self.f_seq))
                 if kw[Field.ACK] == self.lastSeq:
                     self.logger.log('Last seq ACKed')
+                    self.window.push(b'')
+                elif kw[Field.ACK] == self.lastSeq + 1:
+                    self.done = True
+                    break
             elif self.rwnd:
                 self.logger.log('Timeout')
                 self.window.timeout()

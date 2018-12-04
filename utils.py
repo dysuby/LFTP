@@ -61,7 +61,6 @@ class Constant:
     CLIENT_PATH = 'test/client/'
     SERVER_PATH = 'test/server/'
     MSS = 1024
-    CLIENT_PORT = 11111
     SERVER_PORT = 11112
     WORKER_PORT = 11113
     TIMEOUT = 0.01

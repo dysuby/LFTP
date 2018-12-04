@@ -116,6 +116,7 @@ class Sender:
             raise
         self.logger = Logger('Sender {}/Receiver {}:{}'.format(port, *addr))
         self.receiver_addr = addr
+        print(addr)
         self.rwnd = rwnd
         self.window = Window(100)
         self.port = port
@@ -147,6 +148,7 @@ class Sender:
             except StopIteration:
                 pass
             except ConnectionResetError:
+                raise
                 actors.clear()
         self.logger.log('Work Done')
         self.sc.close()
@@ -156,7 +158,7 @@ class Sender:
         while True:
             if self.rwnd == 0:
                 self.logger.log(
-                    'Waiting client free current SEQ: {}'.format(kw[Field.SEQ]))
+                    'Waiting receiver free current SEQ: {}'.format(kw[Field.SEQ]))
                 self.sc.sendto(PACK.serialize(b'', kw), self.receiver_addr)
             if self.window.action == CC.NONE:
                 self.logger.log('No Action')

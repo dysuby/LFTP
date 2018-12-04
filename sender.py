@@ -139,16 +139,6 @@ class Sender:
 
         self.window.push(b'')   # 启动报文
 
-        while self.window.canSend(self.rwnd):
-            data = self.read()
-            if not data:
-                self.window.push(b'')
-                break
-            else:
-                self.window.push(data)
-                self.f_seq += 1
-                self.logger.log('Push SEQ {} into queue'.format(self.f_seq))
-
         actors = queue.deque([self.sendTo(), self.recvFrom()])
         while actors:
             task = actors.popleft()

@@ -148,11 +148,11 @@ class Sender:
                 pass
             except ConnectionResetError:
                 actors.clear()
-        self.logger.log('Work Done')
+        self.logger.log('Task Done')
         self.sc.close()
 
     def sendTo(self):
-        kw = {Field.PORT: self.port, Field.SEQ_NUM: self.lastSeq}
+        kw = {Field.PORT: self.port, Field.SEQ_NUM: self.lastSeq + 1}
         while True:
             if self.rwnd == 0:
                 self.logger.log(

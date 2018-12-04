@@ -28,6 +28,7 @@ class Reciever:
                 actors.append(task)
             except StopIteration:
                 pass
+        self.logger.log('Task Done')
 
     def recv(self):
         ACK = 0
@@ -48,7 +49,6 @@ class Reciever:
                     rkw[Field.SEQ], ACK + 1))
                 if rkw[Field.SEQ] == ACK + 1 and self.putData(data):
                     ACK += 1
-                    kw[Field.ACK] = rkw[Field.SEQ]
                     self.logger.log('Correct SEQ: {}'.format(ACK))
                     if ACK == rkw[Field.SEQ_NUM] + 1:
                         self.done = True
@@ -58,6 +58,7 @@ class Reciever:
                 else:
                     self.logger.log('Full Queue')
 
+                kw[Field.ACK] = rkw[Field.SEQ]
                 kw[Field.RWND] = self.ws - len(self.buffer)
             yield
         sc.close()

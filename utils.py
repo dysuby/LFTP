@@ -79,6 +79,7 @@ class Field:
 
     HEADER_LEN = 200
     CUT = '|!@#$%^&*()'
+    EMPTY = -1
 
 
 class CongestionControl:

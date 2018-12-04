@@ -67,7 +67,7 @@ class Reciever:
     def handleData(self):
         part = 0
         while not self.f.closed:
-            while len(self.buffer) and random.random() > Constant.HANDLE_PRO:
+            while len(self.buffer):
                 data = self.getData()
                 self.f.write(data)
                 part += 1

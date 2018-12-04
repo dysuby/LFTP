@@ -37,7 +37,7 @@ class Server:
                         Operation.Isend, client_addr))
                     worker = Reciever(client_addr, Constant.WORKER_PORT, Constant.CLIENT_PATH +
                                       kwargs[Field.FILE_NAME], Constant.SERVER_PATH +
-                                      '{}.{}'.format(str(time.time()), kwargs[Field.FILE_NAME].split('.')[-1]), 0.2)
+                                      '{}.{}'.format(str(time.time()), kwargs[Field.FILE_NAME].split('.')[-1]), 0.5)
                 else:
                     raise ValueError
                 son = threading.Thread(target=worker.run)

@@ -163,8 +163,7 @@ class Sender:
         self.sc.close()
 
     def sendTo(self):
-        kw = {Field.PORT: self.port, Field.EOF: self.done,
-              Field.SEQ_NUM: self.lastSeq}
+        kw = {Field.PORT: self.port, Field.SEQ_NUM: self.lastSeq}
         while not self.done:
             if self.rwnd == 0:
                 self.logger.log(
@@ -184,11 +183,10 @@ class Sender:
                 for data in seqs:
                     self.logger.log('Sending SEQ: {}'.format(seqnum))
                     kw[Field.SEQ] = seqnum
-                    if seqnum == self.lastSeq:
-                        self.logger.log('Last SEQ: {}'.format(seqnum))
-                        kw[Field.EOF] = True
                     data = PACK.serialize(data, kw)
                     self.sc.sendto(data, self.receiver_addr)
+                    if seqnum == self.lastSeq:
+                        self.logger.log('Last File SEQ: {}'.format(seqnum))
                     seqnum += 1
             yield
 

@@ -18,9 +18,7 @@ class PACK:
         for i in range(1, end):
             key, value = fileds[i].split(b':')
             key = key.decode()
-            if key in [Field.EOF]:
-                value = value == b'True'
-            elif key in [Field.FILE_NAME, Field.OPT]:
+            if key in [Field.FILE_NAME, Field.OPT]:
                 value = value.decode()
             else:
                 value = int(value)
@@ -66,7 +64,7 @@ class Constant:
     CLIENT_PORT = 2333
     SERVER_PORT = 9999
     WORKER_PORT = 12345
-    TIMEOUT = 1
+    TIMEOUT = 0.1
 
 
 class Field:
@@ -75,8 +73,6 @@ class Field:
     PORT = 'port'
     SEQ = 'seq'
     SEQ_NUM = 'sn'
-
-    EOF = 'eof'
 
     FILE_NAME = 'fn'
     OPT = 'opt'

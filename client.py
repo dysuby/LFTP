@@ -2,6 +2,7 @@ import socket
 import sys
 import time
 import select
+import threading
 from utils import Logger, Operation, Constant, PACK, Field
 from sender import Sender
 from receiver import Reciever
@@ -51,5 +52,11 @@ class Client:
 
 if __name__ == '__main__':
     server_addr = 'localhost', Constant.SERVER_PORT
-    client = Client(int(sys.argv[3]), server_addr)
-    client.handle(sys.argv[2], sys.argv[1])
+    client1 = Client(int(sys.argv[3]), server_addr)
+    a = threading.Thread(target=client1.handle, args=(sys.argv[2], sys.argv[1]))
+
+    client2 = Client(int(sys.argv[3]) + 1, server_addr)
+    b = threading.Thread(target=client2.handle, args=(sys.argv[2], sys.argv[1]))
+
+    a.start()
+    b.start()

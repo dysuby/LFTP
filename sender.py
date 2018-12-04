@@ -46,16 +46,12 @@ class Window:
         self.q.append(data)
 
     def getNonSend(self):
-        if self.q:
-            ret = self.q[self.next - self.base:], self.next
-            self.next += len(ret[0])
-            return ret
-        return [], 0
+        ret = self.q[self.next - self.base:], self.next
+        self.next += len(ret[0])
+        return ret
 
     def getNonACK(self):
-        if self.q:
-            return self.q[:self.next - self.base], self.base
-        return [], 0
+        return self.q[:self.next - self.base], self.base
 
     def slowStart(self, acknum):
         if self.cwnd >= self.ssthresh:
@@ -161,6 +157,7 @@ class Sender:
             except ConnectionResetError:
                 actors.clear()
         self.logger.log('Work Done')
+        self.sc.close()
 
     def sendTo(self):
         kw = {Field.PORT: self.port, Field.EOF: self.done,
@@ -193,7 +190,6 @@ class Sender:
     def recvFrom(self):
         while True:
             rl, _, _ = select.select([self.sc], [], [], Constant.TIMEOUT)
-            print(rl)
             if rl:
                 response = self.sc.recv(Constant.MSS)
                 kw = PACK.deserialize(response)[0]
@@ -218,4 +214,3 @@ class Sender:
                 self.logger.log('Timeout')
                 self.window.timeout()
             yield
-        self.sc.close()

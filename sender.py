@@ -33,25 +33,24 @@ class Window:
         # GBN
         if acknum == self.base:
             self.base += 1
-            self.q = self.q[1:]
             self.logger.log('Correct ACK {}'.format(acknum))
 
         self.logger.log('Current state: {} action: {} cwnd: {} ssthresh: {} NonACK: {} NonSend: {}'.format(
             self.state, self.action, self.cwnd, self.ssthresh, self.base, self.next))
 
     def canSend(self, rwnd):
-        return len(self.q) < min([self.cwnd, self.ws, rwnd])
+        return len(self.q) - self.base < min([self.cwnd, self.ws, rwnd])
 
     def push(self, data):
         self.q.append(data)
 
     def getNonSend(self):
-        ret = self.q[self.next - self.base:], self.next
+        ret = self.q[self.next:], self.next
         self.next += len(ret[0])
         return ret
 
     def getNonACK(self):
-        return self.q[:self.next - self.base], self.base
+        return self.q[self.base:self.next], self.base
 
     def slowStart(self, acknum):
         if self.cwnd >= self.ssthresh:

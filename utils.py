@@ -63,9 +63,9 @@ class Constant:
     MSS = 1024
     SERVER_PORT = 11112
     WORKER_PORT = 11113
-    TIMEOUT = 0.01
+    TIMEOUT = 0.1
     HANDLE_PRO = 0.5
-    THROW_RATE = 0.5
+    THROW_RATE = 0
 
 class Field:
     RWND = 'rwnd'

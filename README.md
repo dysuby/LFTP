@@ -15,7 +15,7 @@
 ## 文件结构
 
 - `test` 存放文件，`server` 为服务器**读写**文件的路径，`client` 同理
-- `test.py` 为测试文件
+- `test.py` 为测试文件，用于判断两个文件是否一致，用法：`py test.py <server_file> <client_file>`
 - `utils.py` 为一些工具函数和参数
 - `sender.py`/`receiver.py` 为`worker` 类。
 

@@ -116,7 +116,6 @@ class Sender:
             raise
         self.logger = Logger('Sender {}/Receiver {}:{}'.format(port, *addr))
         self.receiver_addr = addr
-        self.done = False
         self.rwnd = rwnd
         self.window = Window(100)
         self.port = port
@@ -154,7 +153,7 @@ class Sender:
 
     def sendTo(self):
         kw = {Field.PORT: self.port, Field.SEQ_NUM: self.lastSeq}
-        while not self.done:
+        while True:
             if self.rwnd == 0:
                 self.logger.log(
                     'Waiting client free current SEQ: {}'.format(kw[Field.SEQ]))

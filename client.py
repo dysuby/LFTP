@@ -8,9 +8,9 @@ from receiver import Reciever
 
 
 class Client:
-    def __init__(self, host, port):
-        self.server_addr = (host, port)
-        self.client_port = Constant.CLIENT_PORT
+    def __init__(self, client_port, server_addr):
+        self.server_addr = server_addr
+        self.client_port = client_port
         self.rwnd = 20
         self.logger = Logger('Client: ')
 
@@ -50,6 +50,6 @@ class Client:
 
 
 if __name__ == '__main__':
-    HOST, PORT = 'localhost', Constant.SERVER_PORT
-    client = Client(HOST, PORT)
+    server_addr = 'localhost', Constant.SERVER_PORT
+    client = Client(int(sys.argv[3]), server_addr)
     client.handle(sys.argv[2], sys.argv[1])

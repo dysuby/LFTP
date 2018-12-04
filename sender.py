@@ -63,6 +63,7 @@ class Window:
             self.action = CC.TRANS
         else:
             self.dupack += 1
+            self.action = CC.NONE
             if self.dupack == 3:
                 self.toQuickR()
 
@@ -79,8 +80,9 @@ class Window:
             self.action = CC.TRANS
         else:
             self.dupack += 1
-        if self.dupack == 3:
-            self.toQuickR()
+            self.action = CC.NONE
+            if self.dupack == 3:
+                self.toQuickR()
 
     def timeout(self):
         self.ssthresh = self.cwnd / 2
@@ -97,6 +99,7 @@ class Window:
             self.state = CC.AVOID_CONGEST
             self.cwnd = self.ssthresh
             self.dupack = 0
+            self.action = CC.NONE
 
 
 class Sender:
@@ -167,6 +170,8 @@ class Sender:
                 self.logger.log(
                     'Waiting client free current SEQ: {}'.format(kw[Field.SEQ]))
                 self.sc.sendto(PACK.serialize(b'', kw), self.receiver_addr)
+            if self.window.action == CC.NONE:
+                self.logger.log('No Action')
             else:
                 if self.window.action == CC.TRANS:
                     seqs, seqnum = self.window.getNonSend()

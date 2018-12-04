@@ -42,9 +42,9 @@ class Reciever:
             self.logger.log('Sending ACK: {}'.format(kw[Field.ACK]))
             sc.sendto(empty, self.sender_addr)
             seq = sc.recv(Constant.MSS + Field.HEADER_LEN)
+            rkw, data = PACK.deserialize(seq)
 
             if len(self.buffer) < self.ws and random.random() >= self.throw_rate:   # 随机丢包
-                rkw, data = PACK.deserialize(seq)
                 self.logger.log('receive SEQ: {} expected SEQ: {}'.format(
                     rkw[Field.SEQ], ACK + 1))
                 if rkw[Field.SEQ] == ACK + 1:
@@ -60,6 +60,8 @@ class Reciever:
             else:
                 self.logger.log('Full Queue')
 
+            if rkw[Field.SEQ] == Field.EMPTY:
+                rkw[Field.ACK] = Field.EMPTY
             kw[Field.RWND] = self.ws - len(self.buffer)
             yield
         sc.close()
@@ -67,7 +69,7 @@ class Reciever:
     def handleData(self):
         part = 0
         while not self.f.closed:
-            while len(self.buffer):
+            while len(self.buffer) and random.random() > Constant.HANDLE_PRO:
                 data = self.getData()
                 self.f.write(data)
                 part += 1

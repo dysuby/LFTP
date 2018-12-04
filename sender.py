@@ -199,7 +199,7 @@ class Sender:
                             'Push SEQ {} into queue'.format(self.f_seq))
                 if kw[Field.ACK] == self.lastSeq:
                     self.logger.log('Last seq ACKed')
-            else:
+            elif self.rwnd:
                 self.logger.log('Timeout')
                 self.window.timeout()
             yield

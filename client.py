@@ -19,7 +19,7 @@ class Client:
         sc.bind(('localhost', self.client_port))
         if opt == Operation.Iget:
             kw = {Field.FILE_NAME: Constant.SERVER_PATH +
-                filename, Field.RWND: self.rwnd, Field.OPT: opt}
+                  filename, Field.RWND: self.rwnd, Field.OPT: opt}
 
             self.send(sc, kw)
             data = sc.recv(Constant.MSS + Field.HEADER_LEN)
@@ -27,7 +27,7 @@ class Client:
             self.server_addr = self.server_addr[0], kw[Field.PORT]
             sc.close()
             worker = Reciever(self.server_addr, self.client_port, Constant.SERVER_PATH + filename,
-                Constant.CLIENT_PATH + '{}.{}'.format(str(time.time()), filename.split('.')[-1]), 0)
+                              Constant.CLIENT_PATH + str(time.time()), 0.5)
         else:
             kw = {Field.OPT: opt, Field.FILE_NAME: filename, Field.OPT: opt}
 
@@ -47,6 +47,7 @@ class Client:
         while not rl:
             sc.sendto(data, self.server_addr)
             rl, _, _ = select.select([sc], [], [], Constant.TIMEOUT)
+
 
 if __name__ == '__main__':
     HOST, PORT = 'localhost', Constant.SERVER_PORT

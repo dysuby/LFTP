@@ -36,14 +36,14 @@ class Server:
                     self.logger.log('Receive {} request from {}'.format(
                         Operation.Isend, client_addr))
                     worker = Reciever(client_addr, Constant.WORKER_PORT, Constant.CLIENT_PATH +
-                                      kwargs[Field.FILE_NAME], Constant.SERVER_PATH +
-                                      '{}.{}'.format(str(time.time()), kwargs[Field.FILE_NAME].split('.')[-1]), 0.5)
+                                      kwargs[Field.FILE_NAME], Constant.SERVER_PATH + str(time.time()), 0.5)
                 else:
                     raise ValueError
                 son = threading.Thread(target=worker.run)
                 son.start()
                 Constant.WORKER_PORT += 1
                 client_table[client_addr] = son
+
 
 if __name__ == '__main__':
     HOST, PORT = 'localhost', Constant.SERVER_PORT

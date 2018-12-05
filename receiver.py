@@ -49,9 +49,9 @@ class Reciever:
                     rkw[Field.SEQ], ACK + 1))
                 if rkw[Field.SEQ] == ACK + 1:
                     ACK += 1
-                    self.putData(data)
+                    self.buffer.append(data)
                     self.logger.log('Correct SEQ: {}'.format(ACK))
-                    if ACK == rkw[Field.SEQ_NUM] + 1:
+                    if ACK == rkw[Field.SEQ_NUM]:
                         self.done = True
                         break
                 else:
@@ -69,18 +69,13 @@ class Reciever:
     def handleData(self):
         part = 0
         while not self.f.closed:
-            while len(self.buffer) and random.random() > Constant.HANDLE_PRO:
-                data = self.getData()
+            while self.buffer and random.random() > Constant.HANDLE_PRO:
+                data = self.buffer.popleft()
                 self.f.write(data)
                 part += 1
                 self.logger.log('Writing {} to file'.format(part))
-            if self.done and not len(self.buffer):
+            if self.done and not self.buffer:
                 self.f.close()
                 self.logger.log('Receive file done')
             yield
 
-    def putData(self, data):
-        self.buffer.append(data)
-
-    def getData(self):
-        return self.buffer.popleft()

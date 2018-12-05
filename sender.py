@@ -148,7 +148,8 @@ class Sender:
 
     def sendTo(self):
         kw = {Field.PORT: self.port, Field.SEQ_NUM: self.lastSeq + 1}
-        while not self.done:
+        resend_time = 0
+        while not self.done and resend_time < Constant.RESEND_MAX:
             if self.rwnd == 0:
                 kw[Field.SEQ] = Field.EMPTY
                 self.logger.log(
@@ -161,6 +162,8 @@ class Sender:
                         'Transmit {} packets from seqnum: {}'.format(len(seqs), seqnum))
                 elif self.window.action == CC.RETRANS:
                     seqs, seqnum = self.window.getNonACK()
+                    if seqnum == self.lastSeq + 1:
+                        resend_time += 1
                     self.logger.log(
                         'Retransmit {} packets from seqnum: {}'.format(len(seqs), seqnum))
                 for data in seqs:

@@ -51,8 +51,9 @@ class Reciever:
                     ACK += 1
                     self.buffer.append(data)
                     self.logger.log('Correct SEQ: {}'.format(ACK))
-                    if ACK == rkw[Field.SEQ_NUM]:
+                    if ACK == rkw[Field.SEQ_NUM] - 1:
                         self.done = True
+                    elif ACK == rkw[Field.SEQ_NUM]:
                         break
                 else:
                     self.logger.log('Unexpected SEQ {}'.format(rkw[Field.SEQ]))

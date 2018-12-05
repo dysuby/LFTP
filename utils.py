@@ -66,7 +66,7 @@ class Constant:
     TIMEOUT = 0.1
     HANDLE_PRO = 0.5
     THROW_RATE = 0
-    RESEND_MAX = 100
+    RESEND_MAX = 20
 
 class Field:
     RWND = 'rwnd'

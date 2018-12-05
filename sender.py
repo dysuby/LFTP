@@ -31,13 +31,17 @@ class Window:
             self.quickRecover(acknum)
 
         # GBN
+        ret = False
         if acknum == self.base:
             self.base += 1
             self.q = self.q[1:]
             self.logger.log('Correct ACK {}'.format(acknum))
+            ret = True
 
         self.logger.log('Current state: {} action: {} cwnd: {} ssthresh: {} NonACK: {} NonSend: {}'.format(
             self.state, self.action, self.cwnd, self.ssthresh, self.base, self.next))
+
+        return ret
 
     def canSend(self, rwnd):
         return len(self.q) < min([self.cwnd, self.ws, rwnd])
@@ -185,23 +189,22 @@ class Sender:
                 self.rwnd = kw[Field.RWND]
                 self.logger.log('receive ACK: {}'.format(kw[Field.ACK]))
 
-                if kw[Field.ACK] != Field.EMPTY:
-                    self.window.ack(kw[Field.ACK])
-                while self.file and self.window.canSend(self.rwnd):
-                    data = self.read()
-                    if not data:
-                        self.logger.log('All file data pushed into queue')
-                    else:
-                        self.window.push(data)
-                        self.f_seq += 1
-                        self.logger.log(
-                            'Push SEQ {} into queue'.format(self.f_seq))
-                if kw[Field.ACK] == self.lastSeq:
-                    self.logger.log('Last seq ACKed')
-                    self.window.push(b'')
-                elif kw[Field.ACK] == self.lastSeq + 1:
-                    self.done = True
-                    break
+                if kw[Field.ACK] != Field.EMPTY and self.window.ack(kw[Field.ACK]):
+                    while self.file and self.window.canSend(self.rwnd):
+                        data = self.read()
+                        if not data:
+                            self.logger.log('All file data pushed into queue')
+                        else:
+                            self.window.push(data)
+                            self.f_seq += 1
+                            self.logger.log(
+                                'Push SEQ {} into queue'.format(self.f_seq))
+                    if kw[Field.ACK] == self.lastSeq:
+                        self.logger.log('Last seq ACKed')
+                        self.window.push(b'')
+                    elif kw[Field.ACK] == self.lastSeq + 1:
+                        self.done = True
+                        break
             elif self.rwnd:
                 self.logger.log('Timeout')
                 self.window.timeout()

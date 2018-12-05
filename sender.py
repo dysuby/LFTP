@@ -189,6 +189,14 @@ class Sender:
                 self.rwnd = kw[Field.RWND]
                 self.logger.log('receive ACK: {}'.format(kw[Field.ACK]))
 
+                if kw[Field.ACK] != Field.EMPTY:
+                    if self.window.ack(kw[Field.ACK]):
+                        if kw[Field.ACK] == self.lastSeq:
+                            self.logger.log('Last seq ACKed')
+                            self.window.push(b'')
+                        elif kw[Field.ACK] == self.lastSeq + 1:
+                            self.done = True
+                            break
                 while self.file and self.window.canSend(self.rwnd):
                     data = self.read()
                     if not data:
@@ -198,13 +206,6 @@ class Sender:
                         self.f_seq += 1
                         self.logger.log(
                             'Push SEQ {} into queue'.format(self.f_seq))
-                if kw[Field.ACK] != Field.EMPTY and self.window.ack(kw[Field.ACK]):
-                    if kw[Field.ACK] == self.lastSeq:
-                        self.logger.log('Last seq ACKed')
-                        self.window.push(b'')
-                    elif kw[Field.ACK] == self.lastSeq + 1:
-                        self.done = True
-                        break
             elif self.rwnd:
                 self.logger.log('Timeout')
                 self.window.timeout()

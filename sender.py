@@ -189,16 +189,16 @@ class Sender:
                 self.rwnd = kw[Field.RWND]
                 self.logger.log('receive ACK: {}'.format(kw[Field.ACK]))
 
+                while self.file and self.window.canSend(self.rwnd):
+                    data = self.read()
+                    if not data:
+                        self.logger.log('All file data pushed into queue')
+                    else:
+                        self.window.push(data)
+                        self.f_seq += 1
+                        self.logger.log(
+                            'Push SEQ {} into queue'.format(self.f_seq))
                 if kw[Field.ACK] != Field.EMPTY and self.window.ack(kw[Field.ACK]):
-                    while self.file and self.window.canSend(self.rwnd):
-                        data = self.read()
-                        if not data:
-                            self.logger.log('All file data pushed into queue')
-                        else:
-                            self.window.push(data)
-                            self.f_seq += 1
-                            self.logger.log(
-                                'Push SEQ {} into queue'.format(self.f_seq))
                     if kw[Field.ACK] == self.lastSeq:
                         self.logger.log('Last seq ACKed')
                         self.window.push(b'')

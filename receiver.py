@@ -74,7 +74,7 @@ class Reciever:
                 self.f.write(data)
                 part += 1
                 self.logger.log('Writing {} to file'.format(part))
-            if self.done:
+            if self.done and not len(self.buffer):
                 self.f.close()
                 self.logger.log('Receive file done')
             yield
